@@ -3,19 +3,55 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
+	"github.com/Ruthvik10/simple_bank/internal/store"
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
-func main() {
-	dsn := "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
-	db, err := initDB(dsn)
+type config struct {
+	port string
+	env  string
+	db   struct {
+		dsn string
+	}
+}
+
+type application struct {
+	cfg    config
+	logger *log.Logger
+	store  store.Store
+}
+
+func init() {
+	err := godotenv.Load("../../.env")
 	if err != nil {
-		log.Fatal("error connecting to the database")
+		log.Fatal(err)
+	}
+}
+
+func main() {
+	cfg := config{
+		port: os.Getenv("PORT"),
+		env:  os.Getenv("ENV"),
+		db: struct{ dsn string }{
+			dsn: os.Getenv("DSN"),
+		},
+	}
+	l := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	app := application{
+		cfg:    cfg,
+		logger: l,
+	}
+	db, err := initDB(app.cfg.db.dsn)
+	if err != nil {
+		log.Fatal("error connecting to the database", err)
 	}
 	defer db.Close()
+	app.store = store.NewStore(db)
 	log.Println("database connection successful")
 }
 
