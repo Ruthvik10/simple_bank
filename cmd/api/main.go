@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/Ruthvik10/simple_bank/internal/logger"
 	"github.com/Ruthvik10/simple_bank/internal/store"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
@@ -22,12 +25,12 @@ type config struct {
 
 type application struct {
 	cfg    config
-	logger *log.Logger
+	logger *logger.Logger
 	store  store.Store
 }
 
 func init() {
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,18 +44,35 @@ func main() {
 			dsn: os.Getenv("DSN"),
 		},
 	}
-	l := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	l := logger.New(os.Stdout, logger.LevelInfo)
 	app := application{
 		cfg:    cfg,
 		logger: l,
 	}
 	db, err := initDB(app.cfg.db.dsn)
 	if err != nil {
-		log.Fatal("error connecting to the database", err)
+		app.logger.PrintFatal(err, nil)
 	}
 	defer db.Close()
-	app.store = store.NewStore(db)
-	log.Println("database connection successful")
+	app.store = store.NewStore(db, l)
+	app.logger.PrintInfo("database connection successful", nil)
+	app.logger.PrintInfo("starting server on port "+app.cfg.port, nil)
+	err = initServer(app.cfg.port, app.routes(), l)
+	if err != nil {
+		app.logger.PrintError(err, nil)
+	}
+}
+
+func initServer(port string, handler http.Handler, logger *logger.Logger) error {
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%s", port),
+		Handler:      handler,
+		ReadTimeout:  10 * time.Second,
+		IdleTimeout:  time.Minute,
+		WriteTimeout: 30 * time.Second,
+		ErrorLog:     log.New(logger, "", 0),
+	}
+	return srv.ListenAndServe()
 }
 
 func initDB(dsn string) (*sqlx.DB, error) {

@@ -10,6 +10,10 @@ func (app *application) routes() http.Handler {
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/healthcheck", app.healthCheckHandler)
+		r.Route("/accounts", func(r chi.Router) {
+			r.Post("/", app.CreateAccountHandler)
+			r.Get("/{id:^[0-9]+}", app.getAccountByIDHandler)
+		})
 	})
 	return r
 }
