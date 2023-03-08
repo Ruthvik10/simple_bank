@@ -11,6 +11,7 @@ import (
 	"github.com/Ruthvik10/simple_bank/internal/logger"
 	"github.com/Ruthvik10/simple_bank/internal/store"
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -28,12 +29,12 @@ type application struct {
 	store  store.Store
 }
 
-// func init() {
-// 	err := godotenv.Load()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func main() {
 	cfg := config{

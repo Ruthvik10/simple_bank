@@ -16,6 +16,7 @@ func Test_application_routes(t *testing.T) {
 		{"/api/v1/healthcheck", "GET"},
 		{"/api/v1/accounts/", "POST"},
 		{"/api/v1/accounts/{id:^[0-9]+}", "GET"},
+		{"/api/v1/accounts/", "PUT"},
 	}
 	routes := app.routes()
 
