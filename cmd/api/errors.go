@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func (app *application) logError(r *http.Request, err error) {
 	app.logger.PrintError(err, map[string]any{
@@ -25,6 +28,7 @@ func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) badRequestErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	fmt.Println(err.Error())
 	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 }
 

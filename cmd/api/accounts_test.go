@@ -96,7 +96,6 @@ func Test_application_getAccountByIDHandler_success(t *testing.T) {
 				Balance:   4000,
 				Currency:  "USD",
 				CreatedAt: time.Now(),
-				Version:   0,
 			}
 			return toReturn, nil
 		}
@@ -149,6 +148,122 @@ func Test_application_getAccountByIDHandler_database_error(t *testing.T) {
 	}
 	handler := http.HandlerFunc(app.getAccountByIDHandler)
 	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusInternalServerError {
+		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)
+	}
+}
+
+func Test_application_updateAccountHandler_success(t *testing.T) {
+	reqBody := `
+	{
+		"id":1,
+		"owner":"R",
+		"balance": 2000,
+		"currency":"EUR"
+	}
+	`
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/accounts/", strings.NewReader(reqBody))
+	_updateAccount := mock.UpdateAccount
+	defer func() {
+		mock.UpdateAccount = _updateAccount
+	}()
+	{
+		// mock calls to db
+		mock.UpdateAccount = func(acc *models.Account) error {
+			return nil
+		}
+	}
+	handler := http.HandlerFunc(app.updateAccountHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status code: %d, but got %d", http.StatusOK, response.Result().StatusCode)
+	}
+}
+
+func Test_application_updateAccountHandler_badly_input(t *testing.T) {
+	reqBody := `
+	{
+		"id":1,
+		"owner":"R",
+		"balance": "2000",
+		"currency":"EUR"
+	}
+	`
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/accounts/", strings.NewReader(reqBody))
+	_updateAccount := mock.UpdateAccount
+	defer func() {
+		mock.UpdateAccount = _updateAccount
+	}()
+	{
+		// mock calls to db
+		mock.UpdateAccount = func(acc *models.Account) error {
+			return nil
+		}
+	}
+	handler := http.HandlerFunc(app.updateAccountHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status code: %d, but got %d", http.StatusBadRequest, response.Result().StatusCode)
+	}
+}
+
+func Test_application_updateAccountHandler_record_not_found(t *testing.T) {
+	reqBody := `
+	{
+		"id":1,
+		"owner":"R",
+		"balance": 2000,
+		"currency":"EUR"
+	}
+	`
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/accounts/", strings.NewReader(reqBody))
+	_updateAccount := mock.UpdateAccount
+	defer func() {
+		mock.UpdateAccount = _updateAccount
+	}()
+	{
+		// mock calls to db
+		mock.UpdateAccount = func(acc *models.Account) error {
+			return store.ErrRecordNotFound
+		}
+	}
+	handler := http.HandlerFunc(app.updateAccountHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusNotFound {
+		t.Errorf("expected status code: %d, but got %d", http.StatusNotFound, response.Result().StatusCode)
+	}
+}
+
+func Test_application_updateAccountHandler_database_error(t *testing.T) {
+	reqBody := `
+	{
+		"id":1,
+		"owner":"R",
+		"balance": 2000,
+		"currency":"EUR"
+	}
+	`
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/accounts/", strings.NewReader(reqBody))
+	_updateAccount := mock.UpdateAccount
+	defer func() {
+		mock.UpdateAccount = _updateAccount
+	}()
+	{
+		// mock calls to db
+		mock.UpdateAccount = func(acc *models.Account) error {
+			return errors.New("error")
+		}
+	}
+	handler := http.HandlerFunc(app.updateAccountHandler)
+	response := httptest.NewRecorder()
+
 	handler.ServeHTTP(response, req)
 	if response.Result().StatusCode != http.StatusInternalServerError {
 		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)

@@ -13,10 +13,17 @@ var GetAccountByID = func(id int64) (*models.Account, error) {
 	return nil, nil
 }
 
+var UpdateAccount = func(acc *models.Account) error {
+	return nil
+}
+
 func (mockStore MockAccountStore) Create(acc *models.Account) error {
 	return CreateAccount(acc)
 }
 
 func (mockStore MockAccountStore) Get(id int64) (*models.Account, error) {
 	return GetAccountByID(id)
+}
+func (mockStore MockAccountStore) UpdateAccount(acc *models.Account) error {
+	return UpdateAccount(acc)
 }

@@ -3,7 +3,6 @@ package store
 import (
 	"errors"
 
-	"github.com/Ruthvik10/simple_bank/internal/logger"
 	mock "github.com/Ruthvik10/simple_bank/internal/mock/db"
 	"github.com/Ruthvik10/simple_bank/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -17,11 +16,10 @@ type Store struct {
 	Account models.AccountStore
 }
 
-func NewStore(db *sqlx.DB, l *logger.Logger) Store {
+func NewStore(db *sqlx.DB) Store {
 	return Store{
 		Account: AccountStore{
-			db:     db,
-			logger: l,
+			db: db,
 		},
 	}
 }

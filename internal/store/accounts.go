@@ -4,14 +4,12 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/Ruthvik10/simple_bank/internal/logger"
 	"github.com/Ruthvik10/simple_bank/internal/models"
 	"github.com/jmoiron/sqlx"
 )
 
 type AccountStore struct {
-	db     *sqlx.DB
-	logger *logger.Logger
+	db *sqlx.DB
 }
 
 func (store AccountStore) Get(id int64) (*models.Account, error) {
@@ -33,6 +31,21 @@ func (store AccountStore) Create(acc *models.Account) error {
 	err := store.db.QueryRowx(query, acc.Owner, acc.Balance, acc.Currency).StructScan(acc)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (store AccountStore) UpdateAccount(acc *models.Account) error {
+	query := `UPDATE accounts SET owner=$1, balance=$2, currency=$3 WHERE id=$4 RETURNING *`
+	args := []any{acc.Owner, acc.Balance, acc.Currency, acc.ID}
+	err := store.db.QueryRowx(query, args...).StructScan(acc)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrRecordNotFound
+		default:
+			return err
+		}
 	}
 	return nil
 }

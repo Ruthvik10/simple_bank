@@ -51,3 +51,40 @@ func (app *application) getAccountByIDHandler(w http.ResponseWriter, r *http.Req
 	}
 	app.writeJSON(w, envelope{"account": acc}, http.StatusOK, nil)
 }
+
+func (app *application) updateAccountHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		ID       int64  `json:"id"`
+		Owner    string `json:"owner"`
+		Balance  int64  `json:"balance"`
+		Currency string `json:"currency"`
+	}
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestErrorResponse(w, r, err)
+		return
+	}
+	acc := &models.Account{
+		ID:       input.ID,
+		Owner:    input.Owner,
+		Currency: input.Currency,
+		Balance:  input.Balance,
+	}
+	err = app.store.Account.UpdateAccount(acc)
+	if err != nil {
+		switch {
+		case errors.Is(err, store.ErrRecordNotFound):
+			app.notFoundRespose(w, r)
+			return
+		default:
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	}
+
+	err = app.writeJSON(w, envelope{"account": acc}, http.StatusOK, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}

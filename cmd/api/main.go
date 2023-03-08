@@ -11,7 +11,6 @@ import (
 	"github.com/Ruthvik10/simple_bank/internal/logger"
 	"github.com/Ruthvik10/simple_bank/internal/store"
 	"github.com/jmoiron/sqlx"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -29,12 +28,12 @@ type application struct {
 	store  store.Store
 }
 
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+// func init() {
+// 	err := godotenv.Load()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
 
 func main() {
 	cfg := config{
@@ -54,7 +53,7 @@ func main() {
 		app.logger.PrintFatal(err, nil)
 	}
 	defer db.Close()
-	app.store = store.NewStore(db, l)
+	app.store = store.NewStore(db)
 	app.logger.PrintInfo("database connection successful", nil)
 	app.logger.PrintInfo("starting server on port "+app.cfg.port, nil)
 	err = initServer(app.cfg.port, app.routes(), l)
