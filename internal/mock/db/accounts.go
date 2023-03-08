@@ -21,6 +21,10 @@ var UpdateBalance = func(acc *models.Account) error {
 	return nil
 }
 
+var ListAccounts = func() ([]*models.Account, error) {
+	return nil, nil
+}
+
 func (mockStore MockAccountStore) Create(acc *models.Account) error {
 	return CreateAccount(acc)
 }
@@ -34,4 +38,8 @@ func (mockStore MockAccountStore) UpdateAccount(acc *models.Account) error {
 
 func (mockStore MockAccountStore) UpdateBalance(acc *models.Account) error {
 	return UpdateBalance(acc)
+}
+
+func (mockStore MockAccountStore) List() ([]*models.Account, error) {
+	return ListAccounts()
 }

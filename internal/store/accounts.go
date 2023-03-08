@@ -58,3 +58,13 @@ func (store AccountStore) UpdateBalance(acc *models.Account) error {
 	}
 	return nil
 }
+
+func (store AccountStore) List() ([]*models.Account, error) {
+	var accounts []*models.Account
+	query := `SELECT * FROM accounts ORDER BY id ASC`
+	err := store.db.Select(&accounts, query)
+	if err != nil {
+		return nil, err
+	}
+	return accounts, nil
+}

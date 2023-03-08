@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 			r.Get("/{id:^[0-9]+}", app.getAccountByIDHandler)
 			r.Put("/", app.updateAccountHandler)
 			r.Patch("/{id:^[0-9]+}", app.updateBalanceHandler)
+			r.Get("/", app.listAccountsHandler)
 		})
 	})
 	return r

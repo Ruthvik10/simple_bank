@@ -125,3 +125,16 @@ func (app *application) updateBalanceHandler(w http.ResponseWriter, r *http.Requ
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) listAccountsHandler(w http.ResponseWriter, r *http.Request) {
+	acc, err := app.store.Account.List()
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, envelope{"accounts": acc}, http.StatusOK, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}

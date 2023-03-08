@@ -430,3 +430,54 @@ func Test_application_updateBalanceHandler_update_balance_database_error(t *test
 		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)
 	}
 }
+
+func Test_application_listAccountsHandler_success(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/accounts/", nil)
+	_listAccounts := mock.ListAccounts
+	defer func() {
+		mock.ListAccounts = _listAccounts
+	}()
+	{
+		// mock calls to db
+		mock.ListAccounts = func() ([]*models.Account, error) {
+			toReturn := []*models.Account{
+				{
+					ID:        1,
+					Owner:     "Ruthvik",
+					Balance:   4000,
+					Currency:  "USD",
+					CreatedAt: time.Now(),
+				},
+			}
+			return toReturn, nil
+		}
+	}
+	handler := http.HandlerFunc(app.listAccountsHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status code: %d, but got %d", http.StatusOK, response.Result().StatusCode)
+	}
+}
+
+func Test_application_listAccountsHandler_database_error(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/accounts/", nil)
+	_listAccounts := mock.ListAccounts
+	defer func() {
+		mock.ListAccounts = _listAccounts
+	}()
+	{
+		// mock calls to db
+		mock.ListAccounts = func() ([]*models.Account, error) {
+			return nil, errors.New("error")
+		}
+	}
+	handler := http.HandlerFunc(app.listAccountsHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusInternalServerError {
+		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)
+	}
+}

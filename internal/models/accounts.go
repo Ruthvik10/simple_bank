@@ -14,7 +14,7 @@ type Account struct {
 
 type AccountStore interface {
 	Get(int64) (*Account, error)
-	// List() ([]*Account, error)
+	List() ([]*Account, error)
 	Create(*Account) error
 	UpdateAccount(*Account) error
 	UpdateBalance(*Account) error
