@@ -25,6 +25,10 @@ var ListAccounts = func() ([]*models.Account, error) {
 	return nil, nil
 }
 
+var DeleteAccount = func(id int64) error {
+	return nil
+}
+
 func (mockStore MockAccountStore) Create(acc *models.Account) error {
 	return CreateAccount(acc)
 }
@@ -42,4 +46,8 @@ func (mockStore MockAccountStore) UpdateBalance(acc *models.Account) error {
 
 func (mockStore MockAccountStore) List() ([]*models.Account, error) {
 	return ListAccounts()
+}
+
+func (mockStore MockAccountStore) Delete(id int64) error {
+	return DeleteAccount(id)
 }

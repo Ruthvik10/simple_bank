@@ -138,3 +138,26 @@ func (app *application) listAccountsHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 }
+
+func (app *application) deleteAccountHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.parseReqParam(r, "id")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.store.Account.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, store.ErrRecordNotFound):
+			app.notFoundRespose(w, r)
+			return
+		default:
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	}
+	err = app.writeJSON(w, envelope{"message": "account successfully deleted"}, http.StatusOK, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}

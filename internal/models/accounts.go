@@ -18,4 +18,5 @@ type AccountStore interface {
 	Create(*Account) error
 	UpdateAccount(*Account) error
 	UpdateBalance(*Account) error
+	Delete(id int64) error
 }

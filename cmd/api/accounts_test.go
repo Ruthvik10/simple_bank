@@ -481,3 +481,72 @@ func Test_application_listAccountsHandler_database_error(t *testing.T) {
 		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)
 	}
 }
+
+func Test_application_deleteAccountHandler_success(t *testing.T) {
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/accounts/", nil)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	_deleteAccount := mock.DeleteAccount
+	defer func() {
+		mock.DeleteAccount = _deleteAccount
+	}()
+	{
+		// mock calls to db
+		mock.DeleteAccount = func(id int64) error {
+			return nil
+		}
+	}
+	handler := http.HandlerFunc(app.deleteAccountHandler)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status code: %d, but got %d", http.StatusOK, response.Result().StatusCode)
+	}
+}
+
+func Test_application_deleteAccountHandler_database_error(t *testing.T) {
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/accounts/", nil)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	_deleteAccount := mock.DeleteAccount
+	defer func() {
+		mock.DeleteAccount = _deleteAccount
+	}()
+	{
+		// mock calls to db
+		mock.DeleteAccount = func(id int64) error {
+			return errors.New("error")
+		}
+	}
+	handler := http.HandlerFunc(app.deleteAccountHandler)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusInternalServerError {
+		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)
+	}
+}
+
+func Test_application_deleteAccountHandler_record_not_found(t *testing.T) {
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/accounts/", nil)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	_deleteAccount := mock.DeleteAccount
+	defer func() {
+		mock.DeleteAccount = _deleteAccount
+	}()
+	{
+		// mock calls to db
+		mock.DeleteAccount = func(id int64) error {
+			return store.ErrRecordNotFound
+		}
+	}
+	handler := http.HandlerFunc(app.deleteAccountHandler)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusNotFound {
+		t.Errorf("expected status code: %d, but got %d", http.StatusNotFound, response.Result().StatusCode)
+	}
+}

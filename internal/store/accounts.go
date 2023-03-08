@@ -68,3 +68,19 @@ func (store AccountStore) List() ([]*models.Account, error) {
 	}
 	return accounts, nil
 }
+
+func (store AccountStore) Delete(id int64) error {
+	query := `DELETE FROM accounts WHERE id=$1`
+	result, err := store.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	nRows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if nRows == 0 {
+		return ErrRecordNotFound
+	}
+	return nil
+}
