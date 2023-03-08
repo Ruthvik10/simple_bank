@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -46,7 +45,6 @@ func (app *application) writeJSON(w http.ResponseWriter, data envelope, statusCo
 
 func (app *application) parseReqParam(r *http.Request, field string) (int64, error) {
 	idStr := chi.URLParam(r, field)
-	fmt.Println("id: " + idStr)
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return 0, err

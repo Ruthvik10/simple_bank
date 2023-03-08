@@ -14,6 +14,7 @@ func (app *application) routes() http.Handler {
 			r.Post("/", app.CreateAccountHandler)
 			r.Get("/{id:^[0-9]+}", app.getAccountByIDHandler)
 			r.Put("/", app.updateAccountHandler)
+			r.Patch("/{id:^[0-9]+}", app.updateBalanceHandler)
 		})
 	})
 	return r

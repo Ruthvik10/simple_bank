@@ -269,3 +269,164 @@ func Test_application_updateAccountHandler_database_error(t *testing.T) {
 		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)
 	}
 }
+
+func Test_application_updateBalanceHandler_success(t *testing.T) {
+	reqBody := `{
+		"balance": 5000
+	}`
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/accounts", strings.NewReader(reqBody))
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	_getAccountByID := mock.GetAccountByID
+	_updateBalance := mock.UpdateBalance
+	defer func() {
+		mock.GetAccountByID = _getAccountByID
+		mock.UpdateBalance = _updateBalance
+	}()
+	{
+		// mock calls to db
+		mock.GetAccountByID = func(id int64) (*models.Account, error) {
+			toReturn := &models.Account{
+				ID:        1,
+				Owner:     "Ruthvik",
+				Balance:   4000,
+				Currency:  "USD",
+				CreatedAt: time.Now(),
+			}
+			return toReturn, nil
+		}
+
+		mock.UpdateBalance = func(acc *models.Account) error {
+			return nil
+		}
+	}
+	handler := http.HandlerFunc(app.updateBalanceHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status code: %d, but got %d", http.StatusOK, response.Result().StatusCode)
+	}
+}
+
+func Test_application_updateBalanceHandler_bad_input(t *testing.T) {
+	reqBody := `{
+		"balance": "5000"
+	}`
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/accounts", strings.NewReader(reqBody))
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	_getAccountByID := mock.GetAccountByID
+	_updateBalance := mock.UpdateBalance
+	defer func() {
+		mock.GetAccountByID = _getAccountByID
+		mock.UpdateBalance = _updateBalance
+	}()
+	handler := http.HandlerFunc(app.updateBalanceHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status code: %d, but got %d", http.StatusBadRequest, response.Result().StatusCode)
+	}
+}
+
+func Test_application_updateBalanceHandler_record_not_found(t *testing.T) {
+	reqBody := `{
+		"balance": 5000
+	}`
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/accounts", strings.NewReader(reqBody))
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	_getAccountByID := mock.GetAccountByID
+	_updateBalance := mock.UpdateBalance
+	defer func() {
+		mock.GetAccountByID = _getAccountByID
+		mock.UpdateBalance = _updateBalance
+	}()
+	{
+		// mock calls to db
+		mock.GetAccountByID = func(id int64) (*models.Account, error) {
+			return nil, store.ErrRecordNotFound
+		}
+
+	}
+	handler := http.HandlerFunc(app.updateBalanceHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusNotFound {
+		t.Errorf("expected status code: %d, but got %d", http.StatusNotFound, response.Result().StatusCode)
+	}
+}
+func Test_application_updateBalanceHandler_fetch_account_database_error(t *testing.T) {
+	reqBody := `{
+		"balance": 5000
+	}`
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/accounts", strings.NewReader(reqBody))
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	_getAccountByID := mock.GetAccountByID
+	_updateBalance := mock.UpdateBalance
+	defer func() {
+		mock.GetAccountByID = _getAccountByID
+		mock.UpdateBalance = _updateBalance
+	}()
+	{
+		// mock calls to db
+		mock.GetAccountByID = func(id int64) (*models.Account, error) {
+			return nil, errors.New("error")
+		}
+	}
+	handler := http.HandlerFunc(app.updateBalanceHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusInternalServerError {
+		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)
+	}
+}
+
+func Test_application_updateBalanceHandler_update_balance_database_error(t *testing.T) {
+	reqBody := `{
+		"balance": 5000
+	}`
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/accounts", strings.NewReader(reqBody))
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	_getAccountByID := mock.GetAccountByID
+	_updateBalance := mock.UpdateBalance
+	defer func() {
+		mock.GetAccountByID = _getAccountByID
+		mock.UpdateBalance = _updateBalance
+	}()
+	{
+		// mock calls to db
+		mock.GetAccountByID = func(id int64) (*models.Account, error) {
+			toReturn := &models.Account{
+				ID:        1,
+				Owner:     "Ruthvik",
+				Balance:   4000,
+				Currency:  "USD",
+				CreatedAt: time.Now(),
+			}
+			return toReturn, nil
+		}
+
+		mock.UpdateBalance = func(acc *models.Account) error {
+			return errors.New("error")
+		}
+	}
+	handler := http.HandlerFunc(app.updateBalanceHandler)
+	response := httptest.NewRecorder()
+
+	handler.ServeHTTP(response, req)
+	if response.Result().StatusCode != http.StatusInternalServerError {
+		t.Errorf("expected status code: %d, but got %d", http.StatusInternalServerError, response.Result().StatusCode)
+	}
+}

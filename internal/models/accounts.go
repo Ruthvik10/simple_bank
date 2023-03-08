@@ -17,5 +17,5 @@ type AccountStore interface {
 	// List() ([]*Account, error)
 	Create(*Account) error
 	UpdateAccount(*Account) error
-	// UpdateBalance(*Account) error
+	UpdateBalance(*Account) error
 }

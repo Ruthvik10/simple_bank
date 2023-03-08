@@ -49,3 +49,12 @@ func (store AccountStore) UpdateAccount(acc *models.Account) error {
 	}
 	return nil
 }
+
+func (store AccountStore) UpdateBalance(acc *models.Account) error {
+	query := `UPDATE accounts SET balance=$1 WHERE id=$2 RETURNING *`
+	err := store.db.QueryRowx(query, acc.Balance, acc.ID).StructScan(acc)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -88,3 +88,40 @@ func (app *application) updateAccountHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 }
+
+func (app *application) updateBalanceHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.parseReqParam(r, "id")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	var input struct {
+		Balance int64 `json:"balance"`
+	}
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestErrorResponse(w, r, err)
+		return
+	}
+	acc, err := app.store.Account.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, store.ErrRecordNotFound):
+			app.notFoundRespose(w, r)
+			return
+		default:
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	}
+	acc.Balance = input.Balance
+	err = app.store.Account.UpdateBalance(acc)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJSON(w, envelope{"account": acc}, http.StatusOK, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
