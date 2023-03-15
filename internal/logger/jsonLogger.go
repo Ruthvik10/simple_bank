@@ -79,7 +79,7 @@ func (l *Logger) print(level Level, message string, properties map[string]any) (
 	}
 
 	var line []byte
-	line, err := json.Marshal(aux)
+	line, err := json.MarshalIndent(aux, "", "\t")
 	if err != nil {
 		line = []byte(LevelError.String() + ": unable to marshal log message: " + err.Error())
 	}

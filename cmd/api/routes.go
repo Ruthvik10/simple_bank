@@ -18,6 +18,9 @@ func (app *application) routes() http.Handler {
 			r.Get("/", app.listAccountsHandler)
 			r.Delete("/{id:^[0-9]+}", app.deleteAccountHandler)
 		})
+		r.Route("/transfers", func(r chi.Router) {
+			r.Post("/", app.createTransferHandler)
+		})
 	})
 	return r
 }

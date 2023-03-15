@@ -84,3 +84,17 @@ func (store AccountStore) Delete(id int64) error {
 	}
 	return nil
 }
+
+func (store AccountStore) GetForUpdate(id int64) (*models.Account, error) {
+	var acc models.Account
+	err := store.db.Get(&acc, "SELECT * FROM accounts WHERE id = $1 FOR NO KEY UPDATE", id)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &acc, nil
+}

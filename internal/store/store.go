@@ -13,12 +13,16 @@ var (
 )
 
 type Store struct {
-	Account models.AccountStore
+	Account  models.AccountStore
+	Transfer models.TransferStore
 }
 
 func NewStore(db *sqlx.DB) Store {
 	return Store{
 		Account: AccountStore{
+			db: db,
+		},
+		Transfer: TransferStore{
 			db: db,
 		},
 	}

@@ -29,6 +29,10 @@ var DeleteAccount = func(id int64) error {
 	return nil
 }
 
+var GetAccountForUpdate = func(id int64) (*models.Account, error) {
+	return nil, nil
+}
+
 func (mockStore MockAccountStore) Create(acc *models.Account) error {
 	return CreateAccount(acc)
 }
@@ -50,4 +54,8 @@ func (mockStore MockAccountStore) List() ([]*models.Account, error) {
 
 func (mockStore MockAccountStore) Delete(id int64) error {
 	return DeleteAccount(id)
+}
+
+func (mockStore MockAccountStore) GetForUpdate(id int64) (*models.Account, error) {
+	return GetAccountForUpdate(id)
 }

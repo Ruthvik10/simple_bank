@@ -19,4 +19,5 @@ type AccountStore interface {
 	UpdateAccount(*Account) error
 	UpdateBalance(*Account) error
 	Delete(id int64) error
+	GetForUpdate(int64) (*Account, error)
 }
